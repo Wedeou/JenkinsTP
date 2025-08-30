@@ -20,13 +20,24 @@ spec:
   }
 
   stages {
-    stage('Test python') {
+    stage('Install dependencies') {
       steps {
         container('python') {
           sh 'pip install -r requirements.txt'
+        }
+      }
+    }
+    stage('Test python') {
+      steps {
+        container('python') {
           sh 'python test.py'
         }
       }
+    }
+  }
+  post {
+    always {
+      echo 'Pipeline terminé.'
     }
   }
 }
