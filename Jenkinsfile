@@ -1,8 +1,13 @@
 pipeline {
   agent {
     kubernetes {
+<<<<<<< HEAD
   label 'jenkins-agent-my-app'
   yaml """
+=======
+      label 'jenkins-agent-my-app'
+      yaml '''
+>>>>>>> ef911cd09495af0045ce7012b427cd4a0db7ed0c
 apiVersion: v1
 kind: Pod
 metadata:
@@ -15,6 +20,7 @@ spec:
     command:
     - cat
     tty: true
+<<<<<<< HEAD
   - name: docker
     image: docker
     command:
@@ -33,23 +39,31 @@ spec:
   }
  triggers {
         pollSCM(' * * * * * ')
+=======
+'''
+>>>>>>> ef911cd09495af0045ce7012b427cd4a0db7ed0c
     }
 
+  }
   stages {
     stage('Install dependencies') {
       steps {
-        container('python') {
+        container(name: 'python') {
           sh 'pip install -r requirements.txt'
         }
+
       }
     }
+
     stage('Test python') {
       steps {
-        container('python') {
+        container(name: 'python') {
           sh 'python test.py'
         }
+
       }
     }
+<<<<<<< HEAD
     stage('Build image') {
     steps {
         container('docker') {
@@ -66,11 +80,17 @@ spec:
         }
       }
     }
+=======
+>>>>>>> ef911cd09495af0045ce7012b427cd4a0db7ed0c
 
   }
   post {
     always {
       echo 'Pipeline terminé.'
     }
+
+  }
+  triggers {
+    pollSCM(' * * * * * ')
   }
 }
