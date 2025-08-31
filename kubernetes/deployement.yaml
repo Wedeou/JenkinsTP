@@ -1,0 +1,27 @@
+apiVersion: apps/v1        # API utilisée (apps/v1 est pour les Deployments)
+kind: Deployment           # Ressource que tu veux créer = un Deployment
+
+metadata:
+  name: pythontest         # Nom du déploiement = "pythontest"
+  labels:
+    app: pythontest        # Label associé au déploiement
+
+spec:
+  selector:                # Sélection des pods à gérer
+    matchLabels:
+      app: pythontest
+
+  strategy:                # Stratégie de déploiement
+    type: Recreate         # Ici : recréer les pods au lieu de rolling update
+
+  replicas: 1              # Nombre de pods (1 instance)
+
+  template:                # Template des pods que ce déploiement va créer
+    metadata:
+      labels:
+        app: pythontest    # Label du pod (doit matcher avec le selector)
+    spec:
+      containers:- name: pythontest
+    image: localhost:4000/pythontest:latest
+    ports:
+      - containerPort: 5000

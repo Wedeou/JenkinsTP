@@ -23,6 +23,11 @@ spec:
     volumeMounts:
     - mountPath: /var/run/docker.sock
       name: docker-sock
+      name: kubectl
+      image: lachlanevenson/k8s-kubectl:latest
+      command:
+      -cat
+      tty: true
   volumes:
   - name: docker-sock
     hostPath:
@@ -53,7 +58,7 @@ spec:
         }
 
       }
-    }/*
+    }
     stage('Build image') {
     steps {
         container('docker') {
@@ -69,7 +74,7 @@ spec:
           sh 'kubectl apply -f ./kubernetes/deployement.yaml'
         }
       }
-    }*/
+    }
 
   }
   post {

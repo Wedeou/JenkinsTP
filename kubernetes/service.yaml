@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: pythontest
+  labels:
+    app: pythontest
+spec:
+  ports:
+    - port: 5000         # Port du service (côté cluster)
+      nodePort: 31000    # Port exposé sur le Node (extérieur)
+  selector:
+    app: pythontest      # Le service cible les pods ayant ce label
+  type: NodePort         # Type de service (exposé à l’extérieur)
