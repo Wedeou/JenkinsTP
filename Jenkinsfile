@@ -1,8 +1,8 @@
 pipeline {
   agent {
     kubernetes {
-      label 'jenkins-agent-my-app'
-      yaml """
+  label 'jenkins-agent-my-app'
+  yaml """
 apiVersion: v1
 kind: Pod
 metadata:
@@ -15,8 +15,21 @@ spec:
     command:
     - cat
     tty: true
+  - name: docker
+    image: docker
+    command:
+    - cat
+    tty: true
+    volumeMounts:
+    - mountPath: /var/run/docker.sock
+      name: docker-sock
+  volumes:
+  - name: docker-sock
+    hostPath:
+      path: /var/run/docker.sock
 """
-    }
+}
+
   }
  triggers {
         pollSCM(' * * * * * ')
@@ -37,6 +50,23 @@ spec:
         }
       }
     }
+    stage('Build image') {
+    steps {
+        container('docker') {
+            sh "docker build -t localhost:4000/pythonstest:latest ."
+            sh "docker push localhost:4000/pythonstest:latest"
+        }
+    }
+}
+    stage('Deploy ') {
+      steps {
+        container('kubectl') {
+          sh 'kubectl apply -f ./kubernetes/deployment.yaml'
+          sh 'kubectl apply -f ./kubernetes/deployement.yaml'
+        }
+      }
+    }
+
   }
   post {
     always {
