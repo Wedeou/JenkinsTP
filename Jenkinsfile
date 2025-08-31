@@ -1,8 +1,8 @@
 pipeline {
-  agent {
-    kubernetes {
-  label 'jenkins-agent-my-app'
-  yaml """
+    agent {
+        kubernetes {
+            label 'jenkins-agent-my-app'
+            yaml """
 apiVersion: v1
 kind: Pod
 metadata:
@@ -15,6 +15,9 @@ spec:
     command:
     - cat
     tty: true
+    volumeMounts:
+    - mountPath: /home/jenkins/agent
+      name: workspace
   - name: docker
     image: docker
     command:
@@ -23,66 +26,67 @@ spec:
     volumeMounts:
     - mountPath: /var/run/docker.sock
       name: docker-sock
-      name: kubectl
-      image: lachlanevenson/k8s-kubectl:latest
-      command:
-      -cat
-      tty: true
+  - name: kubectl
+    image: lachlanevenson/k8s-kubectl:latest
+    command:
+    - cat
+    tty: true
   volumes:
   - name: docker-sock
     hostPath:
       path: /var/run/docker.sock
+  - name: workspace
+    emptyDir: {}
 """
-}
+        }
+    }
 
-  }
- triggers {
+    triggers {
         pollSCM(' * * * * * ')
     }
 
-  }
-  stages {
-    stage('Install dependencies') {
-      steps {
-        container(name: 'python') {
-          sh 'pip install -r requirements.txt'
+    stages {
+
+        stage('Install dependencies') {
+            steps {
+                container(name: 'python') {
+                    timeout(time: 5, unit: 'MINUTES') {
+                        sh 'pip install --no-cache-dir -r requirements.txt'
+                    }
+                }
+            }
         }
 
-      }
-    }
-
-    stage('Test python') {
-      steps {
-        container(name: 'python') {
-          sh 'python test.py'
+        stage('Test Python') {
+            steps {
+                container(name: 'python') {
+                    sh 'python test.py'
+                }
+            }
         }
 
-      }
+        stage('Build Docker Image') {
+            steps {
+                container('docker') {
+                    sh 'docker build -t localhost:4000/pythonstest:latest .'
+                    sh 'docker push localhost:4000/pythonstest:latest'
+                }
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                container('kubectl') {
+                    sh 'kubectl apply -f ./kubernetes/deployment.yaml'
+                }
+            }
+        }
+
     }
-    stage('Build image') {
-    steps {
-        container('docker') {
-            sh "docker build -t localhost:4000/pythonstest:latest ."
-            sh "docker push localhost:4000/pythonstest:latest"
+
+    post {
+        always {
+            echo 'Pipeline terminé.'
         }
     }
 }
-    stage('Deploy ') {
-      steps {
-        container('kubectl') {
-          sh 'kubectl apply -f ./kubernetes/deployment.yaml'
-          sh 'kubectl apply -f ./kubernetes/deployement.yaml'
-        }
-      }
-    }
-
-  }
-  post {
-    always {
-      echo 'Pipeline terminé.'
-    }
-
-  }
-  triggers {
-    pollSCM(' * * * * * ')
-  }
