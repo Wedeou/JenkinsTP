@@ -53,7 +53,7 @@ spec:
         }
 
       }
-    }
+    }/*
     stage('Build image') {
     steps {
         container('docker') {
@@ -69,7 +69,7 @@ spec:
           sh 'kubectl apply -f ./kubernetes/deployement.yaml'
         }
       }
-    }
+    }*/
 
   }
   post {
