@@ -18,6 +18,9 @@ spec:
 """
     }
   }
+ triggers {
+        pollSCM(' * * * * * ')
+    }
 
   stages {
     stage('Install dependencies') {
