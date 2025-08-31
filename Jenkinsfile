@@ -1,46 +1,5 @@
 pipeline {
-  agent {
-    kubernetes {
-      label 'jenkins-agent-my-app'
-      yaml '''
-apiVersion: v1
-kind: Pod
-metadata:
-  labels:
-    component: ci
-spec:
-  containers:
-  - name: python
-    image: python:3.12
-    command:
-    - cat
-    tty: true
-    volumeMounts:
-    - mountPath: /home/jenkins/agent
-      name: workspace
-  - name: docker
-    image: docker
-    command:
-    - cat
-    tty: true
-    volumeMounts:
-    - mountPath: /var/run/docker.sock
-      name: docker-sock
-  - name: kubectl
-    image: lachlanevenson/k8s-kubectl:latest
-    command:
-    - cat
-    tty: true
-  volumes:
-  - name: docker-sock
-    hostPath:
-      path: /var/run/docker.sock
-  - name: workspace
-    emptyDir: {}
-'''
-    }
-
-  }
+  agent any
   stages {
     stage('Install dependencies') {
       steps {
